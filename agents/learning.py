@@ -2,7 +2,7 @@
 Autonomous Bayesian Calibration & Active Learning Feedback Engine for cryo-em-density-validation-agent.
 """
 import math
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from pydantic import BaseModel, Field
 
 class WorkerPerformanceMetric(BaseModel):

@@ -2,7 +2,6 @@
 Prometheus Operational Metrics Exporter for cryo-em-density-validation-agent.
 """
 import time
-from typing import Dict, Any
 
 class SystemMetricsCollector:
     def __init__(self):

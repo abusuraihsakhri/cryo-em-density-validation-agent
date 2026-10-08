@@ -9,7 +9,7 @@ from .models import FrontierPayload, AgentTelemetryAlert, ExecutionStatus
 
 
 class FrontierDomainEngine:
-    STANDARD = "wwPDB / EMDataBank Cryo-EM Standards"
+    STANDARD = "Illustrative metadata threshold rules"
     PRIMARY_BOUND = 25.0
     SECONDARY_BOUND = 10.0
 
@@ -18,7 +18,7 @@ class FrontierDomainEngine:
         if value > cls.PRIMARY_BOUND:
             return {
                 "summary": "Primary Domain Boundary Deviation",
-                "details": f"Parameter value ({value:.3f}) exceeds operational threshold ({cls.PRIMARY_BOUND:.1f}) under wwPDB / EMDataBank Cryo-EM Standards.",
+                "details": f"Parameter value ({value:.3f}) exceeds operational threshold ({cls.PRIMARY_BOUND:.1f}) against the example threshold; no wwPDB/EMDB conformance is inferred.",
                 "remediation": "Engage parameter recalibration and algorithmic verification routine.",
             }
         return None
@@ -29,7 +29,7 @@ class FrontierDomainEngine:
             return {
                 "summary": "Critical Domain Condition Triggered",
                 "details": f"Secondary index ({value:.3f}) with CriticalFlag={is_critical} demands prioritized resolution.",
-                "remediation": "Initiate automated fail-safe state machine and telemetry alert dispatch.",
+                "remediation": "Independently review the flag and values.",
             }
         return None
 
@@ -39,7 +39,7 @@ class FrontierDomainEngine:
         if any(flag in desc_upper for flag in ["VIOLATION", "DISCORDANT", "ANOMALY", "MUTANT", "LEAK"]):
             return {
                 "summary": "Specification / Protocol Anomaly Identified",
-                "details": f"Telemetry status flag '{descriptor}' violates wwPDB / EMDataBank Cryo-EM Standards conformance matrix.",
-                "remediation": "Execute automated rollback or secondary consensus verification.",
+                "details": f"Telemetry status flag '{descriptor}' contains a configured keyword; no standards violation is inferred.",
+                "remediation": "Independently review descriptor and source measurement.",
             }
         return None

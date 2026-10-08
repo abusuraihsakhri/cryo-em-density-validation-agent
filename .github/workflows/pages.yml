@@ -41,4 +41,4 @@ jobs:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           curl --fail --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 6 "$PAGES_URL" | grep -q 'Cryo-EM metadata screening'
-          curl --fail --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 6 "$PAGES_URL/app.js" | grep -q 'screenMetadata'
+          curl --fail --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 6 "${PAGES_URL%/}/app.js" | grep -q 'screenMetadata'

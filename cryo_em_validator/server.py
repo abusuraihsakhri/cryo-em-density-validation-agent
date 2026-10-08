@@ -15,7 +15,7 @@ def create_app():
 
         app = FastAPI(
             title="CryoEM-Validator: Fourier Shell Correlation (FSC) & Local Resolution Agent",
-            description="Calculates FSC curves (0.143 and 0.5 cutoffs), validates map-to-model correlation coefficients, and flags atomic clashes in cryo-EM reconstructions.",
+            description="Screens scalar metadata against illustrative thresholds. Does not calculate FSC, map-to-model correlation, or atomic clashes.",
             version="2.0.0-FRONTIER",
         )
 

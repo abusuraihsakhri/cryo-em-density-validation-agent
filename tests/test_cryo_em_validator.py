@@ -36,7 +36,8 @@ def test_coordinator():
     assert dossier["total_alerts"] == 0
 
     ans = coord.query_supervisory_chat("What standard is applied?")
-    assert "wwPDB / EMDataBank Cryo-EM Standards" in ans or "specifications" in ans
+    assert "illustrative metadata rules" in ans
+    assert "no wwPDB/EMDB conformance checks" in ans
 
 
 def test_cli():

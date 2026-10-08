@@ -116,7 +116,9 @@ if (typeof document !== "undefined") {
     const link = document.createElement("a");
     link.href = url;
     link.download = "cryo-em-screening-report.json";
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(url);
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
   });
 }

@@ -1,12 +1,14 @@
 # Cryo-EM Metadata Screening
 
+### [Open the Live Application →](https://abusuraihsakhri.github.io/cryo-em-density-validation-agent/)
+
 A small, rule-based tool for screening user-supplied numerical quality metadata and descriptor keywords. Available as a browser interface, Python command-line tool, and optional FastAPI service.
 
 > **Scientific limitation:** This repository does **not** read MRC/cryo-EM density maps or atomic models; it does not calculate Fourier shell correlation (FSC), map-to-model correlation, local resolution, or atomic clashes. Its scalar thresholds are illustrative, **not** validated wwPDB/EMDB acceptance criteria or clinical decision support.
 
 ## Browser interface
 
-Open the GitHub Pages application once deployment is configured, or open [web/index.html](web/index.html) locally.
+Use the [live browser application](https://abusuraihsakhri.github.io/cryo-em-density-validation-agent/) or open [web/index.html](web/index.html) locally.
 
 - **Browser mode (default):** evaluates rules entirely in JavaScript; entered measurements are not uploaded.
 - **Server mode (optional):** sends inputs to a same-origin FastAPI server. Failed requests show an error, not fabricated reports.
@@ -77,7 +79,7 @@ node --check web/app.js
 node --test tests/test_web.cjs
 ~~~
 
-GitHub Actions runs Python and Node tests for pull requests and master. The separate Pages workflow deploys the static browser app once the repository Pages source is configured for GitHub Actions. A synthetic workload utility is available in simulator.py.
+GitHub Actions runs Python and Node tests for pull requests and master. The separate Pages workflow deploys and smoke-tests the static browser app. A synthetic workload utility is available in simulator.py.
 
 ## Technology and browser compatibility
 

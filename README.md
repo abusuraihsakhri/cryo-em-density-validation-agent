@@ -1,194 +1,88 @@
-# Cryo Em Density Validation Agent
+# Cryo-EM Metadata Screening
 
-> **Domain:** Clinical Decision Support & Biomedical Computing
-> **Reference Guidelines & Standards:** `Standard Clinical Formulations & ISO/IEC Quality Frameworks`
+A small, rule-based tool for screening user-supplied numerical quality metadata and descriptor keywords. Available as a browser interface, Python command-line tool, and optional FastAPI service.
 
-<div align="center">
+> **Scientific limitation:** This repository does **not** read MRC/cryo-EM density maps or atomic models; it does not calculate Fourier shell correlation (FSC), map-to-model correlation, local resolution, or atomic clashes. Its scalar thresholds are illustrative, **not** validated wwPDB/EMDB acceptance criteria or clinical decision support.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+## Browser interface
 
-</div>
+Open the GitHub Pages application once deployment is configured, or open [web/index.html](web/index.html) locally.
 
----
+- **Browser mode (default):** evaluates rules entirely in JavaScript; entered measurements are not uploaded.
+- **Server mode (optional):** sends inputs to a same-origin FastAPI server. Failed requests show an error, not fabricated reports.
+- Inspect JSON results and download a report. Browser results are not cryptographically signed.
 
-## 📖 What It Does
+The static application uses JavaScript, not Pyodide, because the current rules do not need Python scientific libraries. GitHub Pages cannot run the Python API.
 
-**Cryo Em Density Validation Agent** is an advanced analytical and computational platform implementing Fourier Shell Correlation (FSC 0.143) & local resolution cryo-EM map validation. It provides multi-worker consensus evaluation, tamper-evident audit logging, and zero-PHI outbound data protection.
+## Rules and outputs
 
-The project contains two parallel validation subsystems:
+The main Python implementation and browser interface apply the following example rules:
 
-1. **`agents/`** - Main enterprise system with FastAPI REST API, specialized workers, and HMAC-SHA256 audit trail
-2. **`cryo_em_validator/`** - Frontier domain engine for FSC curve calculation and map-to-model fitting
+| Input | Rule | Result |
+| --- | --- | --- |
+| Primary metric | Greater than 25 | Elevated alert |
+| Secondary metric | Greater than 12 | Elevated alert |
+| Critical flag | True | Critical alert |
+| Descriptor | Contains DISCORDANT, ANOMALY, MUTANT, VIOLATION, FAIL or REJECT (case-insensitive) | Elevated alert |
 
----
+Overall urgency is CRITICAL_STAT_PANIC if a critical alert exists, ELEVATED_RISK if an elevated alert exists, and ROUTINE otherwise. The integrity status is a **rule category**, not evidence of cryo-EM reconstruction quality.
 
-## ⚙️ Key Capabilities & Algorithmic Modules
+The legacy **cryo_em_validator/** implementation remains for backward compatibility. It uses a separate example secondary limit (10), alert labels and output schema; it is likewise **not** an FSC calculator.
 
-- **Deterministic Calculation Engine**: Strict compliance with standard reference formulations and thresholds
-- **Multi-Worker Consensus**: InvariantQC, SafetyEscalation, and ProtocolConformance workers
-- **Risk & Urgency Classification**: Multi-tier categorization (ROUTINE, ELEVATED, CRITICAL_STAT)
-- **Validation & Guardrails**: Rigorous input bounds checking and anomaly detection
-- **Prometheus Telemetry**: Operational metrics export for monitoring
+## Install and run
 
----
+Python 3.10–3.12 are tested in CI. The package metadata allows Python 3.9+.
 
-## 🚀 Installation
-
-```bash
-# Clone the repository
+~~~bash
 git clone https://github.com/abusuraihsakhri/cryo-em-density-validation-agent.git
 cd cryo-em-density-validation-agent
-
-# Install dependencies
-pip install fastapi uvicorn pydantic pytest
-```
-
----
-
-## 💻 CLI Quickstart & Usage
-
-### 1. Single Task Evaluation
-```bash
-python cli.py audit --task-id TASK-001 --target KEY-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
-```
-
-### 2. System Configuration Query
-```bash
-python cli.py chat "What is the system status?"
-```
-
-### 3. Batch CSV Processing
-```bash
+python -m pip install -e ".[api,test]"
+python cli.py audit --task-id T1 --target SAMPLE-1 --primary 29 --secondary 14 --status DISCORDANT
 python cli.py batch -i sample.csv -o results.csv
-```
-
-### 4. Verify Audit Trail Integrity
-```bash
 python cli.py verify-audit
-```
-
-### 5. Launch FastAPI REST Server
-```bash
 python cli.py serve --host 127.0.0.1 --port 8000
-```
+~~~
 
-### Parameter Reference
-| Flag | Description | Default |
-|:-----|:------------|:--------|
-| `--task-id` | Unique task/case identifier | TASK-2026-001 |
-| `--target` | Entity or target identifier | KEY-TARGET-01 |
-| `--primary` | Primary measurement value | 28.5 |
-| `--secondary` | Secondary metric value | 14.2 |
-| `--critical` | Emergency escalation flag | False |
-| `--status` | Status/phenotype descriptor | DISCORDANT |
+The installed command **cryo-em-density-validation-agent** runs the main CLI; **cryo-em-density-validation-engine** runs the separate legacy CLI. The API serves the web interface at http://127.0.0.1:8000/.
 
----
+| Endpoint | Function |
+| --- | --- |
+| GET /health | Health check |
+| GET /metrics | In-process task and audit counts (JSON) |
+| POST /api/audit | Screen supplied metadata |
+| POST /api/chat | Deterministic mock response, not model inference |
+| GET /api/audit/logs | Ledger metadata; requires configured AUDIT_LOGS_TOKEN and X-Audit-Token request header |
 
-## 🌐 REST API Endpoints
+The HMAC audit ledger is in memory. It uses AUDIT_SECRET_KEY when set, otherwise generates an ephemeral random key, and entries do not persist across restarts.
 
-When the server is running (`python cli.py serve`):
+~~~bash
+export AUDIT_SECRET_KEY="replace-with-a-long-random-secret"
+export AUDIT_LOGS_TOKEN="replace-with-a-separate-long-random-token"
+docker compose up --build
+~~~
 
-| Endpoint | Method | Description |
-|:---------|:-------|:------------|
-| `/health` | GET | Health and metadata check |
-| `/metrics` | GET | Prometheus operational metrics |
-| `/api/audit` | POST | Submit task for evaluation |
-| `/api/chat` | POST | Supervisory conversational query |
-| `/api/audit/logs` | GET | Retrieve and verify HMAC audit trail |
+## Privacy and security
 
----
+Browser-only mode evaluates inputs locally without analytics or external services. Server mode transmits inputs to the chosen server, which keeps an in-memory registry and audit ledger. Basic regex matching detects some identifying strings but does **not** constitute complete PHI de-identification or HIPAA Safe Harbor compliance. **Do not enter real patient identifiers or protected health information.**
 
-## 🛡️ Security & Enterprise Architecture
+The public API is unauthenticated for local development; production deployments require TLS, authentication, traffic limits and appropriate network access restrictions. The audit-log endpoint is separately token-protected. The app is not a clinical or scientifically validated cryo-EM assessment system.
 
-* **Zero-PHI Outbound Interceptor:** Active regex inspection blocking SSNs, MRNs, phone numbers, emails, DOBs, and patient identifiers
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs with signature verification for every evaluation
-* **Path Traversal Protection:** Batch CLI validates all file paths remain within the working directory
-* **Secure Defaults:** Audit key sourced from `AUDIT_SECRET_KEY` environment variable (ephemeral random key generated if unset)
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances, Claude, GPT-4o, and deterministic test mocks
+## Development and tests
 
----
+~~~bash
+python -m pip install -e ".[api,test]"
+python -m compileall -q agents cryo_em_validator cli.py simulator.py enrichment.py
+python -m pytest -q
+node --check web/app.js
+node --test tests/test_web.cjs
+~~~
 
-## 🧪 Testing & Verification
+GitHub Actions runs Python and Node tests for pull requests and master. The separate Pages workflow deploys the static browser app once the repository Pages source is configured for GitHub Actions. A synthetic workload utility is available in simulator.py.
 
-Run the full automated test suite:
+## Technology and browser compatibility
 
-```bash
-pytest -v
-```
+Python, Pydantic, FastAPI, pytest, vanilla HTML/CSS/JavaScript and Node for browser tests. The browser interface targets current Chromium, Firefox and Safari releases. Its standalone mode requires no backend or browser-Python runtime.
 
-Run security-focused tests only:
+## License
 
-```bash
-pytest tests/test_security.py -v
-```
-
-Execute high-throughput batch simulation benchmarks:
-
-```bash
-python simulator.py 1000
-```
-
----
-
-## 🐳 Container Deployment
-
-```bash
-# Build and run with Docker Compose
-export AUDIT_SECRET_KEY="your-secure-key-here"
-docker-compose up --build
-
-# Or with Docker directly
-docker build -t cryo-em-density-validation-agent .
-docker run -p 8000:8000 -e AUDIT_SECRET_KEY="your-secure-key" cryo-em-density-validation-agent
-```
-
----
-
-## 📁 Project Structure
-
-```
-cryo-em-density-validation-agent/
-├── agents/                      # Main enterprise subsystem
-│   ├── __init__.py
-│   ├── api.py                   # FastAPI REST server
-│   ├── base.py                  # PHI guard, HMAC audit trail
-│   ├── learning.py              # Bayesian calibration engine
-│   ├── llm_factory.py           # LLM provider factory
-│   ├── metrics.py               # Prometheus metrics collector
-│   ├── models.py                # Pydantic data models
-│   ├── streamer.py              # WebSocket telemetry broadcaster
-│   ├── supervisor.py            # Master orchestrator
-│   └── workers.py               # Specialized evaluation workers
-├── cryo_em_validator/           # Frontier domain subsystem
-│   ├── __init__.py
-│   ├── agents.py                # FSC, Map-to-Model, Local Resolution agents
-│   ├── cli.py                   # Frontier CLI
-│   ├── engine.py                # Core algorithmic engine
-│   ├── models.py                # Frontier data models
-│   └── server.py                # Frontier FastAPI server
-├── tests/                       # Test suite
-│   ├── test_cryo_em_density_validation_agent.py
-│   ├── test_cryo_em_validator.py
-│   ├── test_enrichment.py
-│   └── test_security.py         # Security-focused tests
-├── web/                         # Operations console (HTML/JS)
-├── cli.py                       # Main CLI entry point
-├── cryo_em_validator_app.py     # Frontier CLI entry point
-├── enrichment.py                # Enrichment feature engines
-├── simulator.py                 # High-throughput simulation
-├── pyproject.toml               # Project configuration
-├── Dockerfile                   # Container build
-├── docker-compose.yml           # Container orchestration
-└── .github/workflows/ci.yml     # CI/CD pipeline
-```
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT; see [LICENSE](LICENSE).

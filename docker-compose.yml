@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   cryo-em-density-validation-engine:
     build: .
@@ -7,8 +5,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - AUDIT_SECRET_KEY=${AUDIT_SECRET_KEY:-change-me-in-production}
-      - MODEL_PROVIDER=mock
+      - AUDIT_SECRET_KEY=${AUDIT_SECRET_KEY:-}
+      - AUDIT_LOGS_TOKEN=${AUDIT_LOGS_TOKEN:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]

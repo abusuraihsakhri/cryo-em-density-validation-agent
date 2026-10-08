@@ -1,0 +1,44 @@
+name: Deploy browser app to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "web/**"
+      - ".github/workflows/pages.yml"
+      - "index.html"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare static site
+        run: |
+          mkdir -p _site
+          cp web/index.html web/app.js _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Smoke-test deployed Pages HTML and JavaScript
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          curl --fail --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 6 "$PAGES_URL" | grep -q 'Cryo-EM metadata screening'
+          curl --fail --silent --show-error --location --retry 10 --retry-all-errors --retry-delay 6 "${PAGES_URL%/}/app.js" | grep -q 'screenMetadata'

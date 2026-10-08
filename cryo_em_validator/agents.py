@@ -68,6 +68,9 @@ class CryoEMValidatorCoordinator:
         self.execution_ledger: Dict[str, Dict[str, Any]] = {}
 
     def process(self, payload: FrontierPayload) -> Dict[str, Any]:
+        import math
+        if not math.isfinite(payload.primary_metric) or not math.isfinite(payload.secondary_metric):
+            raise ValueError("Metrics must be finite numbers")
         all_alerts: List[AgentTelemetryAlert] = []
         all_alerts.extend(self.sub_1.audit(payload))
         all_alerts.extend(self.sub_2.audit(payload))
@@ -93,7 +96,7 @@ class CryoEMValidatorCoordinator:
             "critical_count": crit_count,
             "warning_count": warn_count,
             "alerts": [a.to_dict() for a in all_alerts],
-            "standard_specification": "wwPDB / EMDataBank Cryo-EM Standards",
+            "standard_specification": "Illustrative metadata thresholds, not wwPDB/EMDB conformance",
             "consensus_summary": f"Consensus evaluation completed across 3 sub-agents with status [{status.value}].",
         }
 
@@ -105,6 +108,6 @@ class CryoEMValidatorCoordinator:
         if "status" in q or "ledger" in q:
             return f"CryoEM-Validator: Fourier Shell Correlation (FSC) & Local Resolution Agent currently managing {len(self.execution_ledger)} execution tasks in air-gapped memory."
         elif "standard" in q or "spec" in q:
-            return "Active runtime operating strictly according to wwPDB / EMDataBank Cryo-EM Standards specifications."
+            return "Only illustrative metadata rules are implemented; no wwPDB/EMDB conformance checks are performed."
         else:
-            return f"CryoEM-Validator: Fourier Shell Correlation (FSC) & Local Resolution Agent executive coordinator online. Zero-telemetry on-premises surveillance active."
+            return f"CryoEM-Validator: Fourier Shell Correlation (FSC) & Local Resolution Agent executive coordinator online. Local coordinator ready; no external telemetry is implemented."

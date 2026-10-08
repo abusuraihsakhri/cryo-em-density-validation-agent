@@ -4,7 +4,7 @@ FastAPI REST API Server for Cryo Em Density Validation Agent.
 import os
 import hmac
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
@@ -58,7 +58,7 @@ def api_chat(req: ChatRequest):
 
 
 @app.get("/api/audit/logs")
-def api_audit_logs(x_audit_token: str | None = Header(default=None)):
+def api_audit_logs(x_audit_token: Optional[str] = Header(default=None)):
     """Protect ledger metadata: do not expose it anonymously."""
     required = os.environ.get("AUDIT_LOGS_TOKEN", "")
     if not required:

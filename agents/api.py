@@ -16,7 +16,7 @@ supervisor = SystemSupervisor(model_provider="mock")
 
 app = FastAPI(
     title="Cryo Em Density Validation Agent API",
-    description="Enterprise Distributed Component Platform (Clinical & Biomedical AI)",
+    description="Illustrative scalar metadata screening. Does not calculate FSC or validate cryo-EM maps.",
     version="3.0.0-ENTERPRISE",
 )
 

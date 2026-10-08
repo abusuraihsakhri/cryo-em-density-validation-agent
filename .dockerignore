@@ -1,0 +1,16 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+.venv
+venv
+__pycache__
+.pytest_cache
+*.pyc
+*.pyo
+*.log
+results.csv
+output.csv
+test_input_tmp.csv
+test_output_tmp.csv

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cryo-em-density-validation-engine"
 version = "2.0.0"
-description = "CryoEM-Validator: Fourier Shell Correlation (FSC) & Local Resolution Engine"
+description = "Rule-based screening of supplied cryo-EM quality metadata; not an FSC map-analysis implementation"
 readme = "README.md"
 authors = [{ name = "Dr. Abu Suraih Sakhri", email = "abusuraih@example.com" }]
 license = { text = "MIT" }
@@ -13,15 +13,23 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Topic :: Security/Cryptography",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 requires-python = ">=3.9"
-dependencies = []
+dependencies = ["pydantic>=2,<3"]
+
+[project.optional-dependencies]
+api = ["fastapi>=0.110,<1", "uvicorn>=0.27,<1"]
+test = ["pytest>=8,<10", "httpx>=0.27,<1"]
 
 [project.scripts]
+cryo-em-density-validation-agent = "cli:main"
 cryo-em-density-validation-engine = "cryo_em_validator.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/abusuraihsakhri/cryo-em-density-validation-engine"
-Repository = "https://github.com/abusuraihsakhri/cryo-em-density-validation-engine.git"
+Homepage = "https://github.com/abusuraihsakhri/cryo-em-density-validation-agent"
+Repository = "https://github.com/abusuraihsakhri/cryo-em-density-validation-agent.git"
+
+[tool.setuptools]
+packages = ["agents", "cryo_em_validator"]
+py-modules = ["cli", "simulator", "enrichment", "cryo_em_validator_app"]

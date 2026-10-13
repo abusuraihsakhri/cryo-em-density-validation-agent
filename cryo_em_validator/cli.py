@@ -32,7 +32,7 @@ def _validate_safe_path(filepath: str) -> str:
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(prog="cryo-em-density-validation-agent", description="CryoEM-Validator: Fourier Shell Correlation (FSC) & Local Resolution Agent")
+    parser = argparse.ArgumentParser(prog="cryo-em-density-validation-agent", description="Legacy illustrative cryo-EM metadata screening rules")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Audit
@@ -71,8 +71,8 @@ def main(argv=None):
         )
         dossier = coordinator.process(payload)
         print("=" * 80)
-        print(f"  CRYOEM-VALIDATOR: FOURIER SHELL CORRELATION (FSC) & LOCAL RESOLUTION AGENT")
-        print(f"  Domain: Biomedical Scientific Discovery & Multi-Omics | Standard: wwPDB / EMDataBank Cryo-EM Standards")
+        print(f"  CRYO-EM METADATA SCREENING (LEGACY RULES)")
+        print(f"  Scope: Illustrative scalar rules only; no FSC or wwPDB/EMDB validation")
         print(f"  Task: {dossier['task_id']} | Status: [{dossier['overall_status']}] | Total Alerts: {dossier['total_alerts']}")
         print("=" * 80)
         for a in dossier["alerts"]:

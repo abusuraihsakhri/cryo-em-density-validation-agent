@@ -27,7 +27,7 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "HEALTHY", "service": "cryo-em-density-validation-agent", "domain": "Clinical & Biomedical AI", "standard": "CAP / CLSI / ISO Standards", "version": "3.0.0-ENTERPRISE"}
+    return {"status": "HEALTHY", "service": "cryo-em-density-validation-agent", "domain": "Clinical & Biomedical AI", "standard": "Illustrative metadata rules; no external standard conformance assessed", "version": "3.0.0-ENTERPRISE"}
 
 
 @app.get("/metrics")

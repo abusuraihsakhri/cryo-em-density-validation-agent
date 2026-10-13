@@ -6,6 +6,7 @@ import uuid
 from typing import Dict, Any, List
 from .models import FrontierPayload, AgentTelemetryAlert, ExecutionStatus
 from .engine import FrontierDomainEngine
+from agents.base import PHIGuard
 
 
 class FSCCurveCalculatorAgent:
@@ -68,6 +69,9 @@ class CryoEMValidatorCoordinator:
         self.execution_ledger: Dict[str, Dict[str, Any]] = {}
 
     def process(self, payload: FrontierPayload) -> Dict[str, Any]:
+        PHIGuard.assert_no_phi(payload.task_id)
+        PHIGuard.assert_no_phi(payload.target_identifier)
+        PHIGuard.assert_no_phi(payload.status_descriptor)
         import math
         if not math.isfinite(payload.primary_metric) or not math.isfinite(payload.secondary_metric):
             raise ValueError("Metrics must be finite numbers")
@@ -104,6 +108,7 @@ class CryoEMValidatorCoordinator:
         return dossier
 
     def query_supervisory_chat(self, query: str) -> str:
+        PHIGuard.assert_no_phi(query)
         q = query.strip().lower()
         if "status" in q or "ledger" in q:
             return f"CryoEM-Validator: Fourier Shell Correlation (FSC) & Local Resolution Agent currently managing {len(self.execution_ledger)} execution tasks in air-gapped memory."

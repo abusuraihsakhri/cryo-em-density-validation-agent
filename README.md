@@ -29,7 +29,7 @@ The main Python implementation and browser interface apply the following example
 
 Overall urgency is CRITICAL_STAT_PANIC if a critical alert exists, ELEVATED_RISK if an elevated alert exists, and ROUTINE otherwise. The integrity status is a **rule category**, not evidence of cryo-EM reconstruction quality.
 
-The legacy **cryo_em_validator/** implementation remains for backward compatibility. It uses a separate example secondary limit (10), alert labels and output schema; it is likewise **not** an FSC calculator.
+The legacy **cryo_em_validator/** implementation remains for backward compatibility. It uses a separate example secondary limit (10), alert labels and output schema; it is likewise **not** an FSC calculator. Its API rejects non-finite metrics and uses the same limited identifier-screening guard as the primary API.
 
 ## Install and run
 
@@ -67,7 +67,7 @@ docker compose up --build
 
 Browser-only mode evaluates inputs locally without analytics or external services. Server mode transmits inputs to the chosen server, which keeps an in-memory registry and audit ledger. Basic regex matching detects some identifying strings but does **not** constitute complete PHI de-identification or HIPAA Safe Harbor compliance. **Do not enter real patient identifiers or protected health information.**
 
-The public API is unauthenticated for local development; production deployments require TLS, authentication, traffic limits and appropriate network access restrictions. The audit-log endpoint is separately token-protected. The app is not a clinical or scientifically validated cryo-EM assessment system.
+The APIs are unauthenticated for local development; Docker Compose binds the host port to **127.0.0.1:8000** by default. Production deployments require TLS, authentication, traffic limits and appropriate network access restrictions. The audit-log endpoint is separately token-protected. The app is not a clinical or scientifically validated cryo-EM assessment system.
 
 ## Development and tests
 
@@ -78,6 +78,8 @@ python -m pytest -q
 node --check web/app.js
 node --test tests/test_web.cjs
 ~~~
+
+Batch CSV exports can be processed again without duplicating the computed result columns. Audit-ledger accessors return copies of signed records to prevent accidental mutation through their public interfaces.
 
 GitHub Actions runs Python and Node tests for pull requests and master. The separate Pages workflow deploys and smoke-tests the static browser app. A synthetic workload utility is available in simulator.py.
 

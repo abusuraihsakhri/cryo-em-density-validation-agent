@@ -10,11 +10,12 @@ coordinator = CryoEMValidatorCoordinator()
 
 def create_app():
     try:
-        from fastapi import FastAPI
-        from pydantic import BaseModel
+        from fastapi import FastAPI, HTTPException
+        from pydantic import BaseModel, Field
+        from agents.base import SecurityException
 
         app = FastAPI(
-            title="CryoEM-Validator: Fourier Shell Correlation (FSC) & Local Resolution Agent",
+            title="Cryo-EM Illustrative Metadata Screening (Legacy API)",
             description="Screens scalar metadata against illustrative thresholds. Does not calculate FSC, map-to-model correlation, or atomic clashes.",
             version="2.0.0-FRONTIER",
         )
@@ -22,11 +23,11 @@ def create_app():
         class TaskRequest(BaseModel):
             task_id: str = "TASK-2026-001"
             target_identifier: str = "TARGET-BIO-KEY"
-            primary_metric: float = 28.5
-            secondary_metric: float = 14.2
+            primary_metric: float = Field(default=28.5, allow_inf_nan=False)
+            secondary_metric: float = Field(default=14.2, allow_inf_nan=False)
             status_descriptor: str = "DISCORDANT_ANOMALY"
             is_critical_flag: bool = True
-            attributes: Dict[str, Any] = {}
+            attributes: Dict[str, Any] = Field(default_factory=dict)
 
         class ChatRequest(BaseModel):
             query: str
@@ -46,11 +47,17 @@ def create_app():
                 is_critical_flag=req.is_critical_flag,
                 attributes=req.attributes,
             )
-            return coordinator.process(payload)
+            try:
+                return coordinator.process(payload)
+            except SecurityException:
+                raise HTTPException(status_code=422, detail="Potential sensitive identifier in request") from None
 
         @app.post("/api/chat")
         def api_chat(req: ChatRequest):
-            return {"response": coordinator.query_supervisory_chat(req.query)}
+            try:
+                return {"response": coordinator.query_supervisory_chat(req.query)}
+            except SecurityException:
+                raise HTTPException(status_code=422, detail="Potential sensitive identifier in request") from None
 
         return app
     except ImportError:

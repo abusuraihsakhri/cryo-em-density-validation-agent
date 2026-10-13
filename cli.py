@@ -110,7 +110,7 @@ def main(argv=None):
                 raise ValueError(f"Missing required CSV columns: {sorted(required - set(fieldnames))}")
             rows = list(reader)
 
-        out_fields = fieldnames + ["overall_urgency", "integrity_status", "total_alerts", "audit_hash"]
+        out_fields = list(dict.fromkeys(fieldnames + ["overall_urgency", "integrity_status", "total_alerts", "audit_hash"]))
         out_rows = []
         for r in rows:
             payload = SystemTaskPayload(

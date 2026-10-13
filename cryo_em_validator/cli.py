@@ -99,7 +99,7 @@ def main(argv=None):
                 raise ValueError(f"Missing required CSV columns: {sorted(required - set(fieldnames))}")
             rows = list(reader)
 
-        out_fields = fieldnames + ["overall_status", "total_alerts", "critical_count", "consensus_summary"]
+        out_fields = list(dict.fromkeys(fieldnames + ["overall_status", "total_alerts", "critical_count", "consensus_summary"]))
         out_rows = []
         for r in rows:
             payload = FrontierPayload(

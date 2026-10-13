@@ -64,3 +64,27 @@ def test_health_does_not_claim_external_standard_conformance():
     health = TestClient(app).get("/health")
     assert health.status_code == 200
     assert "no external standard conformance" in health.json()["standard"]
+
+
+def test_legacy_api_rejects_non_finite_metrics_and_sensitive_identifiers():
+    from cryo_em_validator.server import create_app
+
+    legacy = TestClient(create_app())
+    base = {
+        "task_id": "T1", "target_identifier": "SAMPLE-1",
+        "primary_metric": 1, "secondary_metric": 1,
+        "status_descriptor": "NOMINAL",
+    }
+    assert legacy.post("/api/audit", json=base).status_code == 200
+    for field in ("primary_metric", "secondary_metric"):
+        assert legacy.post(
+            "/api/audit", json={**base, field: "NaN"}
+        ).status_code == 422
+    response = legacy.post(
+        "/api/audit", json={**base, "task_id": "MRN-12345678"}
+    )
+    assert response.status_code == 422
+    assert "12345678" not in response.text
+
+    response = legacy.post("/api/chat", json={"query": "MRN-12345678"})
+    assert response.status_code == 422
